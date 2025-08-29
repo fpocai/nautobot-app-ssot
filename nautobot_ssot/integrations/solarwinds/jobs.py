@@ -152,8 +152,12 @@ class SolarWindsDataSource(DataSource):  # pylint: disable=too-many-instance-att
         if self.containers == "":
             self.logger.error("Containers variable must be defined with container name(s) or 'ALL'.")
             raise JobConfigError
-        if self.containers == "ALL" and self.top_container == "":
-            self.logger.error("Top Container must be specified if `ALL` Containers are to be imported.")
+
+        # Per SolarWindsDataSource().containers.description: 
+        # "Must specify Top Container if `ALL` is specified, unless using CustomProperty."
+        # Implies TopContainer can be empty if using ALL + CustomProperty
+        if self.containers == "ALL" and not (self.top_container or self.custom_property):
+            self.logger.error("Top Container and/or Custom Property must be specified if `ALL` Containers are to be imported.")
             raise JobConfigError
 
     def validate_location_configuration(self):
